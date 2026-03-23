@@ -9,7 +9,7 @@
 
 ## 🌐 Live Demo
 
-👉 **[YOUR_USERNAME.github.io/studymate-ai](https://YOUR_USERNAME.github.io/studymate-ai)**
+👉 **[eminekalli.github.io/studymate-ai](https://eminekalli.github.io/studymate-ai)**
 
 ---
 
@@ -101,9 +101,9 @@ studymate-ai/
 
 ## 👤 Developer
 
-**[Your Name]**  
+**[EMİNE KALLİ]**  
 Future Talent Program — Cohort 2025  
-[linkedin.com/in/your-username](https://linkedin.com)
+(https://www.linkedin.com/in/emine-k-034b6b297/)
 
 ---
 
