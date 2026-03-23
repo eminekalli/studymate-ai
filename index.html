@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudyMate AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="logo">Study<span>Mate</span> AI</div>
+    <div class="nav-right">
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="langTR" onclick="setLang('tr')">TR</button>
+        <button class="lang-btn" id="langEN" onclick="setLang('en')">EN</button>
+      </div>
+      <button class="icon-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+      <button class="icon-btn" onclick="toggleHistory()">🕐</button>
+      <a href="https://github.com/YOUR_USERNAME/studymate-ai" target="_blank" class="github-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </nav>
+
+  <!-- HISTORY PANEL -->
+  <div class="history-panel" id="historyPanel" style="display:none">
+    <div class="history-header">
+      <h3 data-i18n="history">Geçmiş</h3>
+      <button class="icon-btn" onclick="toggleHistory()">✕</button>
+    </div>
+    <div id="historyList" class="history-list"></div>
+    <button class="clear-history-btn" onclick="clearHistory()" data-i18n="clearHistory">Geçmişi Temizle</button>
+  </div>
+  <div class="history-overlay" id="historyOverlay" onclick="toggleHistory()" style="display:none"></div>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="badge">✦ <span data-i18n="badge">Yapay Zeka Destekli</span></div>
+      <h1 data-i18n="heroTitle">Notlarını<br /><em>Zekaya</em> Çevir</h1>
+      <p data-i18n="heroSub">PDF yükle, notunu çalış, AI arkadaşınla motive kal.</p>
+      <a href="#app" class="cta-btn" data-i18n="heroBtn">Hemen Başla ↓</a>
+    </div>
+    <div class="hero-floating">
+      <div class="float-card f1">📎 PDF</div>
+      <div class="float-card f2">🃏 Flashcard</div>
+      <div class="float-card f3">🤖 AI Arkadaş</div>
+    </div>
+  </header>
+
+  <!-- TABS -->
+  <div class="tab-bar" id="app">
+    <button class="tab active" onclick="switchTab('study', this)" data-i18n="tabStudy">📚 Çalış</button>
+    <button class="tab" onclick="switchTab('buddy', this)" data-i18n="tabBuddy">🤖 AI Arkadaş</button>
+  </div>
+
+  <!-- TAB: STUDY -->
+  <main id="tabStudy" class="app-section">
+
+    <!-- API KEY -->
+    <div class="api-box" id="apiBox">
+      <div class="api-inner">
+        <span class="api-icon">🔑</span>
+        <div>
+          <p class="api-label">Claude API Key</p>
+          <input type="password" id="apiKey" placeholder="sk-ant-..." />
+        </div>
+        <button class="save-btn" onclick="saveKey()" data-i18n="save">Kaydet</button>
+      </div>
+      <p class="api-note"><a href="https://console.anthropic.com" target="_blank" data-i18n="apiNote">Buradan ücretsiz alabilirsin →</a></p>
+    </div>
+
+    <!-- INPUT -->
+    <div class="input-card">
+      <div class="input-header">
+        <h2 data-i18n="inputTitle">📄 Notunu Ekle</h2>
+        <span class="char-count" id="charCount">0 karakter</span>
+      </div>
+      <div class="pdf-drop" id="pdfDrop"
+           ondragover="event.preventDefault();this.classList.add('drag-over')"
+           ondragleave="this.classList.remove('drag-over')"
+           ondrop="handleDrop(event)">
+        <input type="file" id="pdfInput" accept=".pdf" style="display:none" onchange="handlePDF(this.files[0])"/>
+        <div class="pdf-drop-inner" id="pdfDropInner" onclick="document.getElementById('pdfInput').click()">
+          <span class="pdf-icon">📎</span>
+          <p><strong data-i18n="pdfUpload">PDF yükle</strong> <span data-i18n="pdfOr">ya da sürükle bırak</span></p>
+          <p class="pdf-sub" data-i18n="pdfSub">Dosya içindeki metin otomatik çıkarılır</p>
+        </div>
+        <div class="pdf-status" id="pdfStatus" style="display:none">
+          <span>✅</span><span id="pdfFileName"></span>
+          <button onclick="clearPDF()" class="pdf-clear" data-i18n="remove">✕ Kaldır</button>
+        </div>
+      </div>
+      <div class="divider"><span data-i18n="orText">ya da metin yapıştır</span></div>
+      <textarea id="noteInput" placeholder="Ders notunu buraya yapıştır..." oninput="updateCount()"></textarea>
+      <div class="mode-select">
+        <button class="mode-btn active" onclick="setMode(this,'all')" data-i18n="modeAll">✨ Hepsini Üret</button>
+        <button class="mode-btn" onclick="setMode(this,'summary')" data-i18n="modeSummary">📝 Özet</button>
+        <button class="mode-btn" onclick="setMode(this,'flashcards')" data-i18n="modeFlash">🃏 Flashcard</button>
+        <button class="mode-btn" onclick="setMode(this,'quiz')" data-i18n="modeQuiz">❓ Quiz</button>
+      </div>
+      <button class="generate-btn" id="generateBtn" onclick="generate()">
+        <span id="btnText" data-i18n="generate">⚡ Üret</span>
+        <div class="spinner" id="spinner" style="display:none"></div>
+      </button>
+    </div>
+
+    <!-- OUTPUT -->
+    <div id="output" style="display:none;flex-direction:column;gap:1.5rem">
+      <div class="result-card" id="summaryCard" style="display:none">
+        <div class="result-header">
+          <h3 data-i18n="summaryTitle">📝 Özet</h3>
+          <div class="result-actions">
+            <button class="action-btn" onclick="speakText('summaryContent')">🔊</button>
+            <button class="action-btn" onclick="exportSummaryPDF()">📄 PDF</button>
+            <button class="action-btn" onclick="copyText('summaryContent')" data-i18n="copy">Kopyala</button>
+          </div>
+        </div>
+        <div id="summaryContent" class="result-body"></div>
+      </div>
+      <div class="result-card" id="flashcardsCard" style="display:none">
+        <div class="result-header">
+          <h3 data-i18n="flashTitle">🃏 Flashcard'lar</h3>
+          <div class="result-actions">
+            <span class="card-counter" id="cardCounter"></span>
+            <button class="action-btn" onclick="exportAnki()">Anki ↓</button>
+          </div>
+        </div>
+        <div class="flashcard-viewer">
+          <div class="flashcard" onclick="flipCard()">
+            <div class="flashcard-inner" id="flashcardInner">
+              <div class="flashcard-front" id="cardFront"></div>
+              <div class="flashcard-back" id="cardBack"></div>
+            </div>
+          </div>
+          <p class="flip-hint" data-i18n="flipHint">Kartı çevirmek için tıkla</p>
+          <div class="card-nav">
+            <button onclick="prevCard()" data-i18n="prev">← Önceki</button>
+            <span id="cardNum">1 / 1</span>
+            <button onclick="nextCard()" data-i18n="next">Sonraki →</button>
+          </div>
+        </div>
+      </div>
+      <div class="result-card" id="quizCard" style="display:none">
+        <div class="result-header">
+          <h3 data-i18n="quizTitle">❓ Quiz</h3>
+          <div id="quizScore" class="quiz-score" style="display:none"></div>
+        </div>
+        <div id="quizContent"></div>
+        <button class="submit-btn" id="submitQuiz" onclick="submitQuiz()" style="display:none" data-i18n="checkAnswers">Cevapları Kontrol Et ✓</button>
+        <button class="submit-btn retry-btn" id="retryQuiz" onclick="retryQuiz()" style="display:none" data-i18n="retry">Tekrar Dene 🔄</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- TAB: AI BUDDY -->
+  <main id="tabBuddy" class="app-section" style="display:none">
+
+    <!-- POMODORO -->
+    <div class="pomodoro-card">
+      <div class="pom-header">
+        <h3>🍅 Pomodoro</h3>
+        <div class="pom-mode-btns">
+          <button class="pom-mode active" onclick="setPomMode(this,25,5)" data-i18n="pomWork">Çalış 25</button>
+          <button class="pom-mode" onclick="setPomMode(this,50,10)" data-i18n="pomLong">Uzun 50</button>
+        </div>
+      </div>
+      <div class="pom-display">
+        <svg class="pom-ring" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="52" class="pom-ring-bg"/>
+          <circle cx="60" cy="60" r="52" class="pom-ring-fg" id="pomRing"
+                  stroke-dasharray="327" stroke-dashoffset="0"/>
+        </svg>
+        <div class="pom-time" id="pomTime">25:00</div>
+        <div class="pom-label" id="pomLabel" data-i18n="pomReady">Hazır</div>
+      </div>
+      <div class="pom-controls">
+        <button class="pom-btn" onclick="pomStart()" id="pomStartBtn" data-i18n="pomStart">▶ Başlat</button>
+        <button class="pom-btn pom-reset" onclick="pomReset()" data-i18n="pomReset">↺ Sıfırla</button>
+      </div>
+    </div>
+
+    <!-- STUDY PLAN -->
+    <div class="buddy-card">
+      <h3 class="buddy-card-title">📅 <span data-i18n="planTitle">Ders Planı Oluştur</span></h3>
+      <div class="plan-form">
+        <div class="plan-row">
+          <input type="text" id="examTopic" placeholder="Konu (ör: Organik Kimya)" class="plan-input"/>
+          <input type="date" id="examDate" class="plan-input"/>
+        </div>
+        <input type="text" id="dailyHours" placeholder="Günlük kaç saat çalışabilirsin?" class="plan-input" style="width:100%"/>
+        <button class="plan-btn" onclick="generatePlan()" id="planBtn">
+          <span id="planBtnText" data-i18n="makePlan">📅 Plan Hazırla</span>
+          <div class="spinner" id="planSpinner" style="display:none"></div>
+        </button>
+      </div>
+      <div id="planOutput" class="plan-output" style="display:none"></div>
+    </div>
+
+    <!-- DAILY REMINDER -->
+    <div class="buddy-card">
+      <h3 class="buddy-card-title">📌 <span data-i18n="reminderTitle">Bugünkü Görev</span></h3>
+      <div class="reminder-form">
+        <input type="text" id="reminderTopic" placeholder="Bugün ne çalışacaksın?" class="plan-input" style="width:100%"/>
+        <button class="plan-btn" onclick="generateReminder()" id="remBtn">
+          <span id="remBtnText" data-i18n="makeReminder">✨ Motivasyon + Plan Al</span>
+          <div class="spinner" id="remSpinner" style="display:none"></div>
+        </button>
+      </div>
+      <div id="reminderOutput" class="plan-output" style="display:none"></div>
+    </div>
+
+    <!-- CHAT -->
+    <div class="buddy-card chat-card">
+      <h3 class="buddy-card-title">💬 <span data-i18n="chatTitle">AI Arkadaşınla Konuş</span></h3>
+      <div class="chat-messages" id="chatMessages">
+        <div class="chat-msg ai">
+          <div class="chat-bubble">Merhaba! 👋 Ben StudyMate AI. Ders sorularını, motivasyonunu ya da çalışma planını benimle konuşabilirsin. Sana nasıl yardımcı olabilirim?</div>
+        </div>
+      </div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="Bir şey sor..." class="chat-input" onkeydown="if(event.key==='Enter')sendChat()"/>
+        <button class="chat-send" onclick="sendChat()">↑</button>
+      </div>
+      <div class="chat-suggestions">
+        <button class="suggestion-btn" onclick="quickChat('Bugün motive olamıyorum, ne yapmalıyım?')">😔 Motive olamıyorum</button>
+        <button class="suggestion-btn" onclick="quickChat('Sınav için en iyi çalışma yöntemi nedir?')">📖 Çalışma yöntemi</button>
+        <button class="suggestion-btn" onclick="quickChat('Pomodoro tekniği nasıl çalışır?')">🍅 Pomodoro nedir?</button>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <p>StudyMate AI — Future Talent Program</p>
+    <p class="footer-sub">Powered by Claude API · Anthropic</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
